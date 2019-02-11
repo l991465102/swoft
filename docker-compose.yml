@@ -1,0 +1,45 @@
+version: '3'
+
+networks:
+  web_app:
+
+services:
+  mysql:
+    image: "mysql:5.7.15"
+    networks:
+      - web_app
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_USER: web_app
+      MYSQL_PASSWORD: 123456
+#      volumes:
+#            - /home/liuzhiwei/PhpstormProjects/docker/mysql/data:/var/lib/mysql
+#            - /home/liuzhiwei/PhpstormProjects/docker/mysql/logs:/logs
+    ports:
+      - "3309:3306"
+  redis:
+    image: "redis:3.2"
+    networks:
+      - web_app
+    ports :
+      - "6380:6379" # 127.0.0.1:6379:6379如不需外网访问容器里面的服务 设置ip地址为127.0.0.1即可
+    environment :
+      - ALLOW_EMPTY_PASSWORD=yes
+      #- appendonly=yes # 打开redis密码设置
+      #- requirepass=123456 # 设置redis密码
+    volumes:
+      - /home/liuzhiwei/PhpstormProjects/docker/redis/data:/data
+    entrypoint: ["redis-server", "--appendonly", "yes"]
+  swoft:
+    image: lzw7758/alpine-php-swoole-dev
+    networks:
+      - web_app
+    ports:
+      - "80:80"
+    volumes:
+      - /home/liuzhiwei/PhpstormProjects/docker/swoft:/var/www/swoft
+    stdin_open: true
+    tty: true
+    privileged: true
+    entrypoint: ["php", "/var/www/swoft/bin/swoft", "start"]
+
